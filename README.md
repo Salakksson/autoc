@@ -8,7 +8,7 @@
 
 ## Compilation
 
-- `install.sh` can be used to compile and install autoc to a specific directory
+- `install.sh` can be used to compile and install autoc to a specific directory (by default `/usr/local/bin`)
 
 ## Configuration
 
@@ -18,14 +18,14 @@
 src = ./src
 bin = ./bin
 target = autoc 
-; ldflags = "-lm -lraylib"
+; ldflags = -lm -lraylib
 
 [.c]
-; command = "gcc %i -o %o"
+; command = gcc %i -o %o
 ```
 - The `[general]` section controls most of the essencials, it is unnecessary as any unrecognised section will be inferred to be `[general]`
 - The `[.extension]` sections control compilation for specific extensions, by default .c files are compiled using `gcc INPUT -o OUTPUT`
-
-## .ini parser
+- The `command` key inserts the source file in `%i` and the object file in `%o` (not implemented)
+## .ini parser 
 
 - The .ini parser used is inih: `https://github.com/benhoyt/inih`

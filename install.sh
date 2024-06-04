@@ -11,4 +11,5 @@ else
     echo "Failed to compile $TARGET, won't install to $INSTALL_DIR"
 fi
 
-rm -fr ./bin/*.o # .o extension in case someone accidentally removes proceding .
+rm -fr ./bin/*.o    # .o extension in case someone accidentally removes
+                    # proceding . and removes /bin if running with sudo
