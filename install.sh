@@ -4,6 +4,9 @@ CFLAGS="-Wall -std=c23 -D_DEFAULT_SOURCE -I/usr/include -O3"
 
 TARGET="autoc"
 INSTALL_DIR="/usr/local/bin"
+
+xxd -i -n default_config ./src/default_config.cstr src/default_config.h
+
 if gcc $CFLAGS ./src/*.c -o $TARGET;
 then
     cp $TARGET $INSTALL_DIR/$TARGET

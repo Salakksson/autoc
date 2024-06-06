@@ -2,6 +2,11 @@
 #include "compile.h"
 #include "config.h"
 
+/* Features to add
+* - Support for custom commands
+* - Support for multiple directories
+* - Better configuration support
+*/
 int main(int argc, char** argv)
 {
     struct config conf;

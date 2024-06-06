@@ -51,10 +51,37 @@ int compile(const char* input, const char* bin_dir, bool forced)
     strcpy(buffer, input);
     char* name = basename(buffer);
 
-    snprintf(out_path, path_length, "%s/%s.o", bin_dir, name);
-    
-    const char* command[] = {"gcc", input, "-c", "-o", out_path, NULL};
-    run_command(command);
+    char command[1024];
+    int bytes = snprintf(command, sizeof(command), "gcc -c %s -o %s/%s.o", input, bin_dir, name);
+    if (bytes < 14)
+    {
+        flog(LOG_ERROR, "failed to create compile command: %s", strerror(errno));
+        flog(LOG_INFO, "print command? (might segfault) (y/N)");
+        char choice = getchar();
+        while (getchar() != '\n');
+        if (toupper(choice) != 'Y')
+            exit(1);
+        
+        printf("command: '%s'\n", command);
+        flog(LOG_INFO, "continue? (y/N)");
+        
+        choice = getchar();
+        while (getchar() != '\n');
+        if (toupper(choice) != 'Y')
+            exit(1);
+
+        flog(LOG_INFO, "continuing... (you may have a deathwish)");
+        sleep(1);
+    }
+    flog(LOG_INFO, "/bin/sh: %s", command);
+    if (system(command))
+    {
+        return 1;
+    }
+    // snprintf(out_path, path_length, "%s/%s.o", bin_dir, name);
+    // 
+    // const char* command[] = {"gcc", input, "-c", "-o", out_path, NULL};
+    // run_command(command);
 
     free(buffer);
     free(out_path);
@@ -121,6 +148,7 @@ int link_to_target(const char* dir, const char* target)
         flog(LOG_INFO, "continuing... (you may have a deathwish)");
         sleep(1);
     }
+    flog(LOG_INFO, "/bin/sh: %s", command);
     if (system(command))
     {
         return 1;

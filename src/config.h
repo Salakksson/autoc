@@ -17,7 +17,6 @@ void init_config(struct config* config);
 
 int handler(void* user, const char* section, const char* name, const char* value);
 
-// void parse_config(struct config* config, const char* file);
-
+void create_config(const char* path);
 
 #endif 
