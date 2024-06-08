@@ -173,6 +173,7 @@ const char** get_directory_list(const char* dir)
 int link_to_target(struct config* conf)
 {
     char command[1024];
+    if (!conf->ldflags) conf->ldflags = "";
     int bytes = snprintf(command, sizeof(command), "gcc %s %s/*.o -o %s", conf->ldflags, conf->bin_dir, conf->target);
     if (bytes < 14)
     {
