@@ -2,6 +2,7 @@
 #define CONFIG_H_
 
 #include "ini.h"
+#include "hashmap.h"
 
 struct config
 {
@@ -10,7 +11,7 @@ struct config
 
     const char* target;
 
-
+    hashmap commands;
 };
 
 void init_config(struct config* config);

@@ -1,90 +1,136 @@
 #include "compile.h"
 
-#include <string.h>
 #include <sys/wait.h>
-#include <libgen.h>
 #include <assert.h>
 #include <dirent.h>
-#include <ctype.h>
+#include <libgen.h>
 
-void run_command(const char** argv)
+const char* get_extension(const char* file)
 {
-    int child_pid = fork();
-
-    if (child_pid == 0)
-    {
-        execvp(argv[0], (char**)argv);
-
-        flog(LOG_ERROR, "execve: %s", strerror(errno));
-        exit(1);
-    }
-    if (child_pid < 0)
-    {
-        flog(LOG_ERROR, "cannot fork process: %s", strerror(errno));
-        exit(1);
-    } 
-
-    // flog(LOG_INFO, "Created child process '%s' with pid %d\n", argv[0], child_pid); 
-
-    if (child_pid != waitpid(child_pid, 0, 0))
-    {
-        flog(LOG_ERROR, "waitpid: %s", strerror(errno));
-        exit(1);
-    }
-
+    const char* orig = file;
+    while(*file) file++;
+    while(*file != '.' && file > orig) file--;
+    return file > orig ? file : "";
 }
 
-int compile(const char* input, const char* bin_dir, bool forced)
+char* format_string(const char* fmt, const char* source, const char* output)
 {
-    if(input[strlen(input) - 1] != 'c') return 0; 
+    int capacity = 20;
+    char* buffer = malloc(capacity);
     
+    if (!buffer)
+    { flog(LOG_ERROR, "insufficient memory for malloc/realloc"); exit(1);}
+
+    int i = 0;
+    enum
+    {
+        APPEND_FMT,
+        CHECK_ARG,
+    }state = APPEND_FMT;
+    
+    size_t source_len = strlen(source);
+    size_t output_len = strlen(output);
+
+    const char* s = fmt;
+    while (*s)
+    {
+        if (i >= capacity)
+            buffer = realloc(buffer, capacity *= 2);
+
+        if (!buffer)
+        { flog(LOG_ERROR, "insufficient memory for malloc/realloc"); exit(1);}
+        
+        switch(state)
+        {
+        case APPEND_FMT:
+            if (*s != '%')
+            {
+                buffer[i++] = *(s++); 
+                break;
+            }
+            state = CHECK_ARG;
+            s++;
+            break;
+        case CHECK_ARG:
+            switch(*(s++))
+            {
+            case '%':
+                buffer[i++] = '%';
+                state = APPEND_FMT;
+                break;
+            case 's':
+                if (i + source_len >= capacity)
+                    buffer = realloc(buffer, capacity *= 2);
+                if (!buffer)
+                { flog(LOG_ERROR, "insufficient memory for malloc/realloc"); exit(1);}
+
+                strcpy(buffer + i, source);
+                i += source_len;
+                break;
+            case 'o':
+                if (i + output_len >= capacity)
+                    buffer = realloc(buffer, capacity *= 2);
+                if (!buffer)
+                { flog(LOG_ERROR, "insufficient memory for malloc/realloc"); exit(1);}
+
+                strcpy(buffer + i, output);
+                i += output_len;
+                break;
+            }
+            state = APPEND_FMT;
+            break;
+        default:
+            UNIMPLEMENTED("fuck you");
+            break;
+        }
+    }
+    // buffer[i] = 0;
+    return buffer;
+}
+
+char* get_command(struct config* conf, const char* source, const char* bin_dir)
+{
+    char* buffer = malloc(strlen(source));
+    
+    const char* ext = get_extension(source);
+    const char* adequate_command = hget(&conf->commands, ext);
+    if (!adequate_command)
+    {
+        // flog(LOG_INFO, "skipping '%s'", source);
+        return NULL;
+    }
+
+    strcpy(buffer, source);
+    char* name = basename(buffer);
+    size_t output_len = strlen(source) + strlen(bin_dir) + 10;
+    char* output = malloc(output_len);
+    snprintf(output, output_len, "%s/%s.o", bin_dir, name);
+    
+    char* command = format_string(adequate_command, source, output); 
+    
+    free(buffer);
+
+    return command;
+}
+
+int compile(struct config* conf, const char* source, const char* bin_dir)
+{    
     if(!*bin_dir)
     {
         flog(LOG_ERROR, "No binary directory set");
         exit(1);
     }
-    size_t path_length = strlen(input) + strlen(bin_dir) + 5; // allocate enough memory for the final path
-    char* out_path = malloc(path_length);                     // although the path will be shorter
-    char* buffer = malloc(strlen(input));
-    assert(out_path && buffer);
+    char* command = get_command(conf, source, bin_dir);
+    if (!command) return 0;
 
-    strcpy(buffer, input);
-    char* name = basename(buffer);
-
-    char command[1024];
-    int bytes = snprintf(command, sizeof(command), "gcc -c %s -o %s/%s.o", input, bin_dir, name);
-    if (bytes < 14)
-    {
-        flog(LOG_ERROR, "failed to create compile command: %s", strerror(errno));
-        flog(LOG_INFO, "print command? (might segfault) (y/N)");
-        char choice = getchar();
-        while (getchar() != '\n');
-        if (toupper(choice) != 'Y')
-            exit(1);
-        
-        printf("command: '%s'\n", command);
-        flog(LOG_INFO, "continue? (y/N)");
-        
-        choice = getchar();
-        while (getchar() != '\n');
-        if (toupper(choice) != 'Y')
-            exit(1);
-
-        flog(LOG_INFO, "continuing... (you may have a deathwish)");
-        sleep(1);
-    }
     flog(LOG_INFO, "/bin/sh: %s", command);
     if (system(command))
     {
+        free(command);
         return 1;
     }
-    // snprintf(out_path, path_length, "%s/%s.o", bin_dir, name);
-    // 
-    // const char* command[] = {"gcc", input, "-c", "-o", out_path, NULL};
-    // run_command(command);
-
-    free(buffer);
-    free(out_path);
+    
+    free(command);
     return 0;
 }
 
@@ -154,10 +200,4 @@ int link_to_target(const char* dir, const char* target)
         return 1;
     }
     return 0;
-    // const char** ls = get_directory_list(dir) ;
-    // for (int i = 0; ls[i]; i++)
-    // {
-    //     const char* command[] = {"ld", ls[i], "-o", target, NULL};
-    //     run_command(command);
-    // }
 }

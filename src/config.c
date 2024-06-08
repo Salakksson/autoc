@@ -3,6 +3,7 @@
 
 void init_config(struct config* config)
 {
+    config->commands = init_hashmap(20);
     int error = ini_parse("./autoc.ini", handler, config);
     if (error == -1)
     {
@@ -27,7 +28,15 @@ int handler(void* user, const char* section, const char* name, const char* value
 {
     struct config* config = user;
     
-    // flog(LOG_INFO, "Handling section '%s' name '%s' value '%s'", section, name, value);
+    if(*section == '.')
+    {
+        // flog(LOG_INFO, "parsing section %s, name %s, value: %s", section, name, value);
+        if (strcmp(name, "command")) return 1;
+        
+        hset(&config->commands, section, value);
+        return 1;
+    }
+
     struct mapping map[] = 
     {
         {"src", &config->src_dir},
@@ -44,7 +53,7 @@ int handler(void* user, const char* section, const char* name, const char* value
         }
         if (++i == map_size)
         {
-            flog(LOG_ERROR, "Failed to parse .autoc, unknown field '%s'", name);
+            flog(LOG_ERROR, "Unknown field in config: [%s] %s = %s", section, name, value);
         }
     }
     return 1;
