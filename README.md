@@ -4,11 +4,13 @@
 
 ## Features
 
-- **Config file**: The tool uses an `autoc.ini` file in a repo directory to set variables such as compiler flags
+- **Config file**: Uses an `autoc.ini` file in the project directory to set variables such as compiler flags
 
 ## Compilation
 
 - `install.sh` can be used to compile and install autoc to a specific directory (by default `/usr/local/bin`)
+
+- There are currently no plans to support platforms other than linux by default, it may take some tweaking to work on other platforms such as windows or macos
 
 ## Configuration
 
@@ -18,7 +20,7 @@
 src = ./src
 bin = ./bin
 target = autoc 
-ldflags = -lm -lraylib
+ldflags = ; blank
 
 [.c]
 command = gcc -Wall -c %s -o %o
