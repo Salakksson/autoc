@@ -4,6 +4,8 @@
 
 /* Features to add
 * - Support for multiple directories
+* - Support for precompiled headers
+* - Support for link flags
 */
 int main(int argc, char** argv)
 {

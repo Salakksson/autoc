@@ -18,13 +18,13 @@
 src = ./src
 bin = ./bin
 target = autoc 
-; ldflags = -lm -lraylib
+ldflags = -lm -lraylib
 
 [.c]
-; command = gcc %s -o %o
+command = gcc -Wall -c %s -o %o
 ```
 - The `[general]` section controls most of the essencials, it is unnecessary as any unrecognised section will be inferred to be `[general]`
-- The `[.extension]` sections control compilation for specific extensions, by default .c files are compiled using `gcc INPUT -o OUTPUT`
+- The `[.extension]` sections control compilation for specific extensions, by default .c files are compiled using `gcc -Wall -c INPUT -o OUTPUT`
 - The `command` key inserts the source file in `%s` and the object file in `%o` (not implemented)
 ## .ini parser 
 
