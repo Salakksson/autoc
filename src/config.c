@@ -15,6 +15,23 @@ void init_config(struct config* config)
         flog(LOG_ERROR, "Failed to parse autoc.ini: ERROR on line %d", error);
         exit(1);
     }
+    error = false;
+    if (!config->target)
+    {
+        flog(LOG_ERROR, "No target specified in config");
+        error = true;
+    }
+    if (!config->src_dir)
+    {
+        flog(LOG_ERROR, "No source directory specified in config");
+        error = true;
+    }
+    if (!config->bin_dir)
+    {
+        flog(LOG_ERROR, "No binary directory specified in config");
+        error = true;
+    }
+    if (error) exit(1);
 }
 
 struct mapping 
