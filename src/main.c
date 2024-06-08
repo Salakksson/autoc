@@ -5,7 +5,7 @@
 /* Features to add
 * - Support for multiple directories
 * - Support for precompiled headers
-* - Support for link flags
+* - Dont recompile unchanged files
 */
 int main(int argc, char** argv)
 {
@@ -21,7 +21,7 @@ int main(int argc, char** argv)
             exit(1);
         }
     }
-    if (link_to_target(conf.bin_dir, conf.target))
+    if (link_to_target(&conf))
     {
         flog(LOG_ERROR, "Failed to link '%s'", conf.target);
         exit(1);

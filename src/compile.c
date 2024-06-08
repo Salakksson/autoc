@@ -170,10 +170,10 @@ const char** get_directory_list(const char* dir)
     return files;
 }
 
-int link_to_target(const char* dir, const char* target)
+int link_to_target(struct config* conf)
 {
     char command[1024];
-    int bytes = snprintf(command, sizeof(command), "gcc %s/*.o -o %s", dir, target);
+    int bytes = snprintf(command, sizeof(command), "gcc %s %s/*.o -o %s", conf->ldflags, conf->bin_dir, conf->target);
     if (bytes < 14)
     {
         flog(LOG_ERROR, "failed to create link command: %s", strerror(errno));

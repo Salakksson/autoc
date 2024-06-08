@@ -8,8 +8,7 @@ void init_config(struct config* config)
     if (error == -1)
     {
         create_config("./autoc.ini");
-        init_config(config);
-        return;
+        exit(0);
     }
     else if (error != 0)
     {
@@ -21,7 +20,7 @@ void init_config(struct config* config)
 struct mapping 
 {
     const char *name;
-    const char **field;
+    char **field;
 };
 
 int handler(void* user, const char* section, const char* name, const char* value)
@@ -41,6 +40,7 @@ int handler(void* user, const char* section, const char* name, const char* value
     {
         {"src", &config->src_dir},
         {"bin", &config->bin_dir},
+        {"ldflags", &config->ldflags},
         {"target", &config->target}
     };
     const size_t map_size = sizeof(map)/sizeof(*map);
@@ -63,7 +63,7 @@ int handler(void* user, const char* section, const char* name, const char* value
 
 void create_config(const char* path)
 {
-    flog(LOG_INFO, "Creating default config '%s'", path);
+    flog(LOG_INFO, "Creating default config '%s', modify it before rerunning", path);
 
     int fd = creat(path, 0666);
     if (fd == -1)

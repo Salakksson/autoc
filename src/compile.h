@@ -15,6 +15,6 @@ int compile(struct config* conf, const char* source, const char* bin_dir);
 
 const char** get_directory_list(const char* dir);
 
-int link_to_target(const char* dir, const char* target);
+int link_to_target(struct config* conf);
 
 #endif // !COMPILE_H_

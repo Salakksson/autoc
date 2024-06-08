@@ -6,10 +6,11 @@
 
 struct config
 {
-    const char* bin_dir;
-    const char* src_dir;
-
-    const char* target;
+    char* bin_dir;
+    char* src_dir;
+    
+    char* ldflags;
+    char* target;
 
     hashmap commands;
 };
