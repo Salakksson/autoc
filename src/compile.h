@@ -4,12 +4,7 @@
 #include "log.h"
 #include "config.h"
 
-char* format_string(const char* fmt, const char* source, const char* output);
-
-
-const char* get_extension(const char* file);
-
-void run_command(const char** args);
+char* get_binary_from_source(const char* src, const char* bin_dir);
 
 int compile(struct config* conf, const char* source, const char* bin_dir);
 

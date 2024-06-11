@@ -13,6 +13,20 @@ const char* get_extension(const char* file)
     return file > orig ? file : "";
 }
 
+char* get_binary_from_source(const char* src, const char* bin_dir)
+{
+    char* name_buffer = strdup(src);
+    char* name = basename(name_buffer);
+
+    size_t output_len = strlen(src) + strlen(bin_dir) + 10;
+    char* output = malloc(output_len);
+    snprintf(output, output_len, "%s/%s.o", bin_dir, name);
+    
+    free(name_buffer);
+
+    return output;
+}
+
 char* format_string(const char* fmt, const char* source, const char* output)
 {
     int capacity = 20;
@@ -90,8 +104,6 @@ char* format_string(const char* fmt, const char* source, const char* output)
 
 char* get_command(struct config* conf, const char* source, const char* bin_dir)
 {
-    char* buffer = malloc(strlen(source));
-    
     const char* ext = get_extension(source);
     const char* adequate_command = hget(&conf->commands, ext);
     if (!adequate_command)
@@ -100,15 +112,11 @@ char* get_command(struct config* conf, const char* source, const char* bin_dir)
         return NULL;
     }
 
-    strcpy(buffer, source);
-    char* name = basename(buffer);
-    size_t output_len = strlen(source) + strlen(bin_dir) + 10;
-    char* output = malloc(output_len);
-    snprintf(output, output_len, "%s/%s.o", bin_dir, name);
+    char* bin_path = get_binary_from_source(source, bin_dir);
+
+    char* command = format_string(adequate_command, source, bin_path); 
     
-    char* command = format_string(adequate_command, source, output); 
-    
-    free(buffer);
+    free(bin_path);
 
     return command;
 }
@@ -174,7 +182,7 @@ int link_to_target(struct config* conf)
 {
     char command[1024];
     if (!conf->ldflags) conf->ldflags = "";
-    int bytes = snprintf(command, sizeof(command), "gcc %s %s/*.o -o %s", conf->ldflags, conf->bin_dir, conf->target);
+    int bytes = snprintf(command, sizeof(command), "g++ %s %s/*.o -o %s", conf->ldflags, conf->bin_dir, conf->target);
     if (bytes < 14)
     {
         flog(LOG_ERROR, "failed to create link command: %s", strerror(errno));

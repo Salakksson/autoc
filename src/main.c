@@ -2,20 +2,41 @@
 #include "compile.h"
 #include "config.h"
 
+time_t file_mod_time(const char* path)
+{
+    struct stat attr;
+    if (stat(path, &attr) == -1)
+    {
+        if (errno == ENOENT) return 0;
+
+        flog(LOG_ERROR, "Failed to stat '%s'", path);
+        exit(1);
+    }
+    return attr.st_mtime;
+}
+ 
 /* Features to add
 * - Support for multiple directories
 * - Support for precompiled headers
-* - Dont recompile unchanged files
+* - Custom linker commands
 */
 int main(int argc, char** argv)
 {
     struct config conf;
     init_config(&conf);
+
     const char** ls = get_directory_list(conf.src_dir);
     for (int i = 0; ls[i]; i++)
     {
         // flog(LOG_INFO, "Compiling file '%s'", ls[i]);
-        if(compile(&conf, ls[i], conf.bin_dir))
+        const char* src = ls[i];
+        char* bin = get_binary_from_source(src, conf.bin_dir); 
+        
+        time_t src_time = file_mod_time(src);
+        time_t bin_time = file_mod_time(bin);
+
+        if (src_time > bin_time)
+        if (compile(&conf, ls[i], conf.bin_dir))
         {
             flog(LOG_ERROR, "Failed to compile '%s'", ls[i]);
             exit(1);

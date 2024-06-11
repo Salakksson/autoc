@@ -66,6 +66,12 @@ int handler(void* user, const char* section, const char* name, const char* value
         if (!strcmp(name, map[i].name)) 
         {
             *map[i].field = strdup(value);
+            if (!*map[i].field)
+            {
+                flog(LOG_ERROR, "Error parsing value stored at %p, the program might segfault on the next print statement", value);
+                flog(LOG_ERROR, "Failed to duplicate string ''", value);
+                exit(1);
+            }
             break;
         }
         if (++i == map_size)
