@@ -1,6 +1,8 @@
 #ifndef CONFIG_H_
 #define CONFIG_H_
 
+#include <stdbool.h>
+
 #include "ini.h"
 #include "hashmap.h"
 
@@ -13,6 +15,9 @@ struct config
     char* target;
 
     hashmap commands;
+
+    bool force_compile;
+    bool link_required;
 };
 
 void init_config(struct config* config);

@@ -22,8 +22,24 @@ time_t file_mod_time(const char* path)
 */
 int main(int argc, char** argv)
 {
-    struct config conf;
+    struct config conf = {0};
     init_config(&conf);
+    if (argc > 1)
+    {
+        if (*argv[1] == '-')
+        switch(argv[1][1])
+        {
+        case 'f':
+            conf.force_compile = true;
+            break;
+        case 'h':
+            flog(LOG_INFO, "Usage: %s <flags>", *argv);
+            flog(LOG_INFO, "-f: force compile all modules");
+            flog(LOG_INFO, "-h: show this info");
+            exit(0);
+        }
+    }
+    time_t config_time = file_mod_time("./autoc.ini");
 
     const char** ls = get_directory_list(conf.src_dir);
     for (int i = 0; ls[i]; i++)
@@ -35,7 +51,7 @@ int main(int argc, char** argv)
         time_t src_time = file_mod_time(src);
         time_t bin_time = file_mod_time(bin);
 
-        if (src_time > bin_time)
+        if (conf.force_compile || MAX(src_time, config_time) > bin_time)
         if (compile(&conf, ls[i], conf.bin_dir))
         {
             flog(LOG_ERROR, "Failed to compile '%s'", ls[i]);

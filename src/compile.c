@@ -137,7 +137,8 @@ int compile(struct config* conf, const char* source, const char* bin_dir)
         free(command);
         return 1;
     }
-    
+    conf->link_required = true;    
+
     free(command);
     return 0;
 }
