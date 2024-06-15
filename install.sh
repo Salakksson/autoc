@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CFLAGS="-Wall -std=c23 -D_DEFAULT_SOURCE -I/usr/include -O3"
+CFLAGS="-Wall -I/usr/include -O3"
 
 TARGET="autoc"
 INSTALL_DIR="/usr/local/bin"

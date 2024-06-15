@@ -5,6 +5,19 @@
 #include <dirent.h>
 #include <libgen.h>
 
+time_t file_mod_time(const char* path)
+{
+    struct stat attr;
+    if (stat(path, &attr) == -1)
+    {
+        if (errno == ENOENT) return 0;
+
+        flog(LOG_ERROR, "Failed to stat '%s'", path);
+        exit(1);
+    }
+    return attr.st_mtime;    
+}
+
 const char* get_extension(const char* file)
 {
     const char* orig = file;

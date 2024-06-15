@@ -2,20 +2,10 @@
 #include "compile.h"
 #include "config.h"
 
-time_t file_mod_time(const char* path)
-{
-    struct stat attr;
-    if (stat(path, &attr) == -1)
-    {
-        if (errno == ENOENT) return 0;
-
-        flog(LOG_ERROR, "Failed to stat '%s'", path);
-        exit(1);
-    }
-    return attr.st_mtime;
-}
- 
-/* Features to add
+/* Things to add/fix
+* - If the length of a string such as target is longer than double the
+*   previous length the formatting function may run out of memory
+* - multiline commands for linking such as writing binary to another directory
 * - Support for multiple directories
 * - Support for precompiled headers
 * - Custom linker commands

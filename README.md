@@ -1,6 +1,6 @@
 # Autoc - Simple Build Tool
 
-#### A simple build tool designed to make compilation simple
+#### A build tool designed to make compilation simple
 
 ## Features
 
@@ -35,3 +35,10 @@ command = gcc -Wall -c %s -o %o
 ## .ini parser 
 
 - The .ini parser used is inih: `https://github.com/benhoyt/inih`
+- In the future a custom parser will be written to support multiline scripts for compiling more complicated projects
+
+## Licencing & contibuting
+
+- If this code results in your computer setting aflame or any other issues you are responsible.
+- If you choose to contribute keep the code as simple as possible, don't add unnecessary dependancies.
+
