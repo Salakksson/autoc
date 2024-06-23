@@ -20,7 +20,7 @@ struct config
     bool link_required;
 
     bool run_target;
-    bool clear_bin;
+    int clear_bin;
 };
 
 void init_config(struct config* config);

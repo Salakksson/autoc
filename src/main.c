@@ -30,12 +30,16 @@ int main(int argc, char** argv)
             conf.run_target = true;
             break;
         case 'c':
-            conf.clear_bin = true;
+            conf.clear_bin = -1;
+            break;
+        case 'C':
+            conf.clear_bin = 1;
             break;
         case 'h':
             flog(LOG_INFO, "Usage: %s <flags>", *argv);
             flog(LOG_INFO, "-f: force compile all modules");
             flog(LOG_INFO, "-c: clear binary path before compiling");
+            flog(LOG_INFO, "-C: clear binary path after compiling");
             flog(LOG_INFO, "-r: run target after compiling");
             flog(LOG_INFO, "-h: show this info");
             exit(0);
@@ -53,6 +57,18 @@ int main(int argc, char** argv)
 
     time_t config_time = file_mod_time("./autoc.ini");
 
+    if (conf.clear_bin == -1)
+    {
+        char command[1024] = {0};
+        assert(strlen("rm /*") + strlen(conf.bin_dir) < 1024);
+        sprintf(command, "rm %s/*", conf.bin_dir);
+
+        flog(LOG_INFO, "Running command '%s'", command); 
+        if (system(command) == -1)
+        {
+            flog(LOG_FATAL, "Failed to run '%s': %s", command, strerror(errno));
+        }
+    }
     const char** ls = get_directory_list(conf.src_dir);
     for (int i = 0; ls[i]; i++)
     {
@@ -73,7 +89,7 @@ int main(int argc, char** argv)
     {
         flog(LOG_FATAL, "Failed to link '%s'", conf.target);
     }
-    if (conf.clear_bin)
+    if (conf.clear_bin == 1)
     {
         char command[1024] = {0};
         assert(strlen("rm /*") + strlen(conf.bin_dir) < 1024);
