@@ -11,6 +11,10 @@ void flog(log_type type, const char* message, ...)
 
     switch (type)
     {
+        case LOG_FATAL:
+            prefix = "FATAL: ";
+            colour = COLOUR_RED;
+            break;
         case LOG_ERROR:
             prefix = "ERROR: ";
             colour = COLOUR_RED;
@@ -38,6 +42,10 @@ void flog(log_type type, const char* message, ...)
     printf("%s\n", COLOUR_RESET);
 
     va_end(args);
+    if (type == LOG_FATAL)
+    {
+        exit(1);
+    }
 }
 
 void* readf_alloc(const char* filepath)

@@ -24,10 +24,9 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-
 typedef enum 
 {
-    LOGD,
+    LOG_FATAL,
     LOG_ERROR,
     LOG_WARNING,
     LOG_INFO,

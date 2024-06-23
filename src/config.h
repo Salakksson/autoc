@@ -18,6 +18,9 @@ struct config
 
     bool force_compile;
     bool link_required;
+
+    bool run_target;
+    bool clear_bin;
 };
 
 void init_config(struct config* config);
