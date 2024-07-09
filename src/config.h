@@ -18,7 +18,7 @@ struct config
 
     bool force_compile;
     bool link_required;
-
+    bool twice;
     bool run_target;
     int clear_bin;
 };
