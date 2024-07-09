@@ -1,8 +1,15 @@
 #include "log.h"
 
+static log_type log_level = LOG_INFO;
+
+void flog_only_errors()
+{
+    log_level = LOG_ERROR;
+}
 
 void flog(log_type type, const char* message, ...)
 {
+    if (type < log_level) return;
     va_list args;
     va_start(args, message);
     

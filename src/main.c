@@ -29,6 +29,9 @@ int main(int argc, char** argv)
         case 'r':
             conf.run_target = true;
             break;
+        case 'q':
+            conf.quiet = true;
+            break;
         case 'c':
             conf.clear_bin = -1;
             break;
@@ -41,9 +44,10 @@ int main(int argc, char** argv)
         case 'h':
             flog(LOG_INFO, "Usage: %s <flags>", *argv);
             flog(LOG_INFO, "-f: force compile all modules");
+            flog(LOG_INFO, "-r: run target after compiling");
+            flog(LOG_INFO, "-q: quiet (no stdout output (unless theres an error))");
             flog(LOG_INFO, "-c: clear binary path before compiling");
             flog(LOG_INFO, "-C: clear binary path after compiling");
-            flog(LOG_INFO, "-r: run target after compiling");
             flog(LOG_INFO, "-t: compile each file twice, temporary measure to aid with precompiled headers");
             flog(LOG_INFO, "-h: show this info");
             flog(LOG_INFO, "Flags can also be combined such as -rf");
@@ -55,7 +59,7 @@ int main(int argc, char** argv)
             flog(LOG_INFO, "use -h for a list of flags");
         }
     }
-
+    if (conf.quiet) flog_only_errors();
     time_t config_time = file_mod_time("./autoc.ini");
     compile:
     if (conf.clear_bin == -1)

@@ -26,16 +26,16 @@
 
 typedef enum 
 {
-    LOG_FATAL,
-    LOG_ERROR,
-    LOG_WARNING,
+    LOG_DEBUG,
     LOG_INFO,
-    LOG_DEBUG
+    LOG_WARNING,
+    LOG_ERROR,
+    LOG_FATAL
 }log_type;
 
+void flog_only_errors();
 
 void flog(log_type type, const char* message, ...);
-
 
 void* readf_alloc(const char* filepath);
 
