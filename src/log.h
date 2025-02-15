@@ -8,7 +8,8 @@
 
 #define COLOUR_RESET   "\x1b[0m"
 
-#include <helper>
+#define UNIMPLEMENTED(a, ...) flog(LOG_FATAL, "unimplemented", ##__VA_ARGS__)
+#define MAX(a, b) ((a > b) ? a : b)
 
 #include <sys/mman.h>
 #include <sys/stat.h>
