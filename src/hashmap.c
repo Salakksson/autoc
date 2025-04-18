@@ -22,7 +22,6 @@ size_t hash(const char* str, size_t capacity)
     return hash % capacity;
 }
 
-
 char* hget(struct hashmap* map, const char* key)
 {
     size_t i = hash(key, map->capacity);
@@ -58,7 +57,7 @@ void hset(struct hashmap* map, const char* key, const char* element)
     }
     current->key = strdup(key);
     current->element = strdup(element);
-    if (!current->key || !current->element) 
+    if (!current->key || !current->element)
     {
         flog(LOG_ERROR, "shits fucked icl");
         exit(1);

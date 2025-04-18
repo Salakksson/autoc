@@ -12,7 +12,7 @@ void flog(log_type type, const char* message, ...)
     if (type < log_level) return;
     va_list args;
     va_start(args, message);
-    
+
     const char* prefix;
     const char* colour;
 
@@ -70,7 +70,7 @@ void* readf_alloc(const char* filepath)
         flog(LOG_ERROR, "fstat: %s", strerror(errno));
         exit(1);
     }
-    
+
     void* buffer = calloc(st.st_size+1, 1);
     if (!buffer)
     {

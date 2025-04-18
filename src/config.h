@@ -10,9 +10,10 @@ struct config
 {
     char* bin_dir;
     char* src_dir;
-    
+
     char* ldflags;
     char* target;
+    char* link_command;
 
     hashmap commands;
 
@@ -30,4 +31,4 @@ int handler(void* user, const char* section, const char* name, const char* value
 
 void create_config(const char* path);
 
-#endif 
+#endif

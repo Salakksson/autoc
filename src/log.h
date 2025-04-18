@@ -25,7 +25,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-typedef enum 
+typedef enum
 {
     LOG_DEBUG,
     LOG_INFO,

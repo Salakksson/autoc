@@ -15,7 +15,7 @@ int main(int argc, char** argv)
 {
     struct config conf = {0};
     init_config(&conf);
-    
+
     for (int i = 1; i < argc; i++)
     {
         char* arg = argv[i];
@@ -61,26 +61,30 @@ int main(int argc, char** argv)
     }
     if (conf.quiet) flog_only_errors();
     time_t config_time = file_mod_time("./autoc.ini");
-    compile:
+
+compile:
     if (conf.clear_bin == -1)
     {
         char command[1024] = {0};
+        assert(conf.bin_dir != NULL);
         assert(strlen("rm /*") + strlen(conf.bin_dir) < 1024);
+        // Scary
         sprintf(command, "rm %s/*", conf.bin_dir);
 
-        flog(LOG_INFO, "Running command '%s'", command); 
+        flog(LOG_INFO, "Running command '%s'", command);
         if (system(command) == -1)
         {
             flog(LOG_FATAL, "Failed to run '%s': %s", command, strerror(errno));
         }
     }
+
     const char** ls = get_directory_list(conf.src_dir);
     for (int i = 0; ls[i]; i++)
     {
         // flog(LOG_INFO, "Compiling file '%s'", ls[i]);
         const char* src = ls[i];
-        char* bin = get_binary_from_source(src, conf.bin_dir); 
-        
+        char* bin = get_binary_from_source(src, conf.bin_dir);
+
         time_t src_time = file_mod_time(src);
         time_t bin_time = file_mod_time(bin);
 
@@ -90,26 +94,35 @@ int main(int argc, char** argv)
             flog(LOG_FATAL, "Failed to compile '%s'", ls[i]);
         }
     }
-    if (conf.twice) {conf.twice = false; goto compile;} // Remove this shit once i add a sensible config
+
+    // Remove this shit once i add a sensible config
+    if (conf.twice)
+    {
+        conf.twice = false;
+        goto compile;
+    }
+
     if (link_to_target(&conf))
     {
         flog(LOG_FATAL, "Failed to link '%s'", conf.target);
     }
+
     if (conf.clear_bin == 1)
     {
         char command[1024] = {0};
         assert(strlen("rm /*") + strlen(conf.bin_dir) < 1024);
         sprintf(command, "rm %s/*", conf.bin_dir);
 
-        flog(LOG_INFO, "Running command '%s'", command); 
+        flog(LOG_INFO, "Running command '%s'", command);
         if (system(command) == -1)
         {
             flog(LOG_FATAL, "Failed to run '%s': %s", command, strerror(errno));
         }
     }
+
     if (conf.run_target)
     {
-        flog(LOG_INFO, "Running target '%s'", conf.target); 
+        flog(LOG_INFO, "Running target '%s'", conf.target);
         if (system(conf.target) == -1)
         {
             flog(LOG_FATAL, "Failed to run target '%s': %s", conf.target, strerror(errno));
