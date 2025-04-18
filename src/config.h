@@ -8,21 +8,20 @@
 
 struct config
 {
-    char* bin_dir;
-    char* src_dir;
+	char* bin_dir;
+	char* src_dir;
 
-    char* ldflags;
-    char* target;
-    char* link_command;
+	char* ldflags;
+	char* target;
+	char* link_command;
 
-    hashmap commands;
+	hashmap commands;
 
-    bool force_compile;
-    bool link_required;
-    bool twice;
-    bool quiet;
-    bool run_target;
-    int clear_bin;
+	bool force_compile;
+	bool link_required;
+	bool quiet;
+	bool run_target;
+	int clear_bin;
 };
 
 void init_config(struct config* config);

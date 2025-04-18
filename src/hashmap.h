@@ -5,15 +5,15 @@
 
 struct hash_element
 {
-    char* key;
-    char* element;
-    struct hash_element* next;
+	char* key;
+	char* element;
+	struct hash_element* next;
 };
 
 typedef struct hashmap
 {
-    struct hash_element* map;
-    size_t capacity;
+	struct hash_element* map;
+	size_t capacity;
 } hashmap;
 
 hashmap init_hashmap(int capacity);

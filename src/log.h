@@ -27,11 +27,11 @@
 
 typedef enum
 {
-    LOG_DEBUG,
-    LOG_INFO,
-    LOG_WARNING,
-    LOG_ERROR,
-    LOG_FATAL
+	LOG_DEBUG,
+	LOG_INFO,
+	LOG_WARNING,
+	LOG_ERROR,
+	LOG_FATAL
 }log_type;
 
 void flog_only_errors();
