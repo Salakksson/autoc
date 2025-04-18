@@ -15,7 +15,7 @@ time_t file_mod_time(const char* path)
         flog(LOG_ERROR, "Failed to stat '%s'", path);
         exit(1);
     }
-    return attr.st_mtime;    
+    return attr.st_mtime;
 }
 
 const char* get_extension(const char* file)
@@ -34,7 +34,7 @@ char* get_binary_from_source(const char* src, const char* bin_dir)
     size_t output_len = strlen(src) + strlen(bin_dir) + 10;
     char* output = malloc(output_len);
     snprintf(output, output_len, "%s/%s.o", bin_dir, name);
-    
+
     free(name_buffer);
 
     return output;
@@ -44,7 +44,7 @@ char* format_string(const char* fmt, const char* source, const char* output)
 {
     int capacity = 20;
     char* buffer = malloc(capacity);
-    
+
     if (!buffer)
     { flog(LOG_ERROR, "insufficient memory for malloc/realloc"); exit(1);}
 
@@ -53,8 +53,8 @@ char* format_string(const char* fmt, const char* source, const char* output)
     {
         APPEND_FMT,
         CHECK_ARG,
-    }state = APPEND_FMT;
-    
+    } state = APPEND_FMT;
+
     size_t source_len = strlen(source);
     size_t output_len = strlen(output);
 
@@ -66,13 +66,13 @@ char* format_string(const char* fmt, const char* source, const char* output)
 
         if (!buffer)
         { flog(LOG_ERROR, "insufficient memory for malloc/realloc"); exit(1);}
-        
+
         switch(state)
         {
         case APPEND_FMT:
             if (*s != '%')
             {
-                buffer[i++] = *(s++); 
+                buffer[i++] = *(s++);
                 break;
             }
             state = CHECK_ARG;
@@ -127,15 +127,15 @@ char* get_command(struct config* conf, const char* source, const char* bin_dir)
 
     char* bin_path = get_binary_from_source(source, bin_dir);
 
-    char* command = format_string(adequate_command, source, bin_path); 
-    
+    char* command = format_string(adequate_command, source, bin_path);
+
     free(bin_path);
 
     return command;
 }
 
 int compile(struct config* conf, const char* source, const char* bin_dir)
-{    
+{
     if(!*bin_dir)
     {
         flog(LOG_ERROR, "No binary directory set");
@@ -150,7 +150,7 @@ int compile(struct config* conf, const char* source, const char* bin_dir)
         free(command);
         return 1;
     }
-    conf->link_required = true;    
+    conf->link_required = true;
 
     free(command);
     return 0;
@@ -194,33 +194,124 @@ const char** get_directory_list(const char* dir)
 
 int link_to_target(struct config* conf)
 {
-    char command[1024];
-    if (!conf->ldflags) conf->ldflags = "";
-    int bytes = snprintf(command, sizeof(command), "g++ %s %s/*.o -o %s", conf->ldflags, conf->bin_dir, conf->target);
-    if (bytes < 14)
+    if (conf->link_command == NULL)
     {
-        flog(LOG_ERROR, "failed to create link command: %s", strerror(errno));
-        flog(LOG_INFO, "print command (might segfault) (y/N)");
-        char choice = getchar();
-        while (getchar() != '\n');
-        if (toupper(choice) != 'Y')
-            exit(1);
-        
-        printf("command: '%s'\n", command);
-        flog(LOG_INFO, "continue? (y/N)");
-        
-        choice = getchar();
-        while (getchar() != '\n');
-        if (toupper(choice) != 'Y')
-            exit(1);
+        char command[1024];
+        if (!conf->ldflags) conf->ldflags = "";
+        int bytes = snprintf(command, sizeof(command), "g++ %s %s/*.o -o %s", conf->ldflags, conf->bin_dir, conf->target);
+        if (bytes < 14)
+        {
+            flog(LOG_ERROR, "failed to create link command: %s", strerror(errno));
+            flog(LOG_INFO, "print command (might segfault) (y/N)");
+            char choice = getchar();
+            while (getchar() != '\n');
+            if (toupper(choice) != 'Y')
+                exit(1);
 
-        flog(LOG_INFO, "continuing... (you may have a deathwish)");
-        sleep(1);
+            printf("command: '%s'\n", command);
+            flog(LOG_INFO, "continue? (y/N)");
+
+            choice = getchar();
+            while (getchar() != '\n');
+            if (toupper(choice) != 'Y')
+                exit(1);
+
+            flog(LOG_INFO, "continuing... (you may have a deathwish)");
+            sleep(1);
+        }
+        flog(LOG_INFO, "/bin/sh: %s", command);
+        if (system(command))
+        {
+            return 1;
+        }
     }
-    flog(LOG_INFO, "/bin/sh: %s", command);
-    if (system(command))
+    else
     {
-        return 1;
+        // Calculate the size of the final command
+        size_t size = 0;
+        size_t link_command_size = strlen(conf->link_command);
+        for (size_t i = 0; i < link_command_size;)
+        {
+            // TODO(nic): allow for escaped %, like %% or \%
+            // so that users can have '%' character in the command
+            if (conf->link_command[i] == '%')
+            {
+                if (i >= link_command_size - 1)
+                {
+                    flog(LOG_WARNING, "Stray '%' at end of linker command");
+                    i += 1;
+                    continue;
+                }
+                char special_ch = conf->link_command[i + 1];
+                switch (special_ch)
+                {
+                    case 'l':
+                        size += strlen(conf->ldflags);
+                        break;
+                    case 't':
+                        size += strlen(conf->target);
+                        break;
+                    case 'o':
+                        size += snprintf(NULL, 0, "%s/*.o", conf->bin_dir);
+                        break;
+                    default:
+                        flog(LOG_WARNING, "Unrecognized '%' special charater in linker command");
+                }
+                i += 2;
+            }
+            else
+            {
+                size += 1;
+                i += 1;
+            }
+        }
+
+        // Build command
+        char *final_command = malloc(size + 1);
+        final_command[size] = '\0';
+        size_t count = 0;
+        for (size_t i = 0; i < link_command_size;)
+        {
+            if (conf->link_command[i] == '%')
+            {
+                if (i >= link_command_size - 1)
+                {
+                    flog(LOG_WARNING, "Stray '%' at end of linker command");
+                    i += 1;
+                    continue;
+                }
+                char special_ch = conf->link_command[i + 1];
+                switch (special_ch)
+                {
+                    case 'l':
+                        memcpy(&final_command[count], conf->ldflags, strlen(conf->ldflags));
+                        count += strlen(conf->ldflags);
+                        break;
+                    case 't':
+                        memcpy(&final_command[count], conf->target, strlen(conf->target));
+                        count += strlen(conf->target);
+                        break;
+                    case 'o':
+                        count += sprintf(&final_command[count], "%s/*.o", conf->bin_dir);
+                        break;
+                    default:
+                        flog(LOG_WARNING, "Unrecognized '%' special charater in linker command");
+                }
+                i += 2;
+            }
+            else
+            {
+                final_command[count++] = conf->link_command[i];
+                i += 1;
+            }
+        }
+
+        flog(LOG_INFO, "/bin/sh: %s", final_command);
+        if (system(final_command))
+        {
+            return 1;
+        }
     }
+
     return 0;
 }
