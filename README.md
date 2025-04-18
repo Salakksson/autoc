@@ -40,5 +40,5 @@ command = gcc -Wall -c %s -o %o
 ## Licencing & contibuting
 
 - If this code results in your computer setting aflame or any other issues you are responsible.
-- If you choose to contribute keep the code as simple as possible, don't add unnecessary dependancies.
+- If you choose to contribute keep the code as simple as possible, don't add unnecessary dependencies.
 
