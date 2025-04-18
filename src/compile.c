@@ -238,7 +238,7 @@ int link_to_target(struct config* conf)
             {
                 if (i >= link_command_size - 1)
                 {
-                    flog(LOG_WARNING, "Stray '%' at end of linker command");
+                    flog(LOG_WARNING, "Stray '%%' at end of linker command");
                     i += 1;
                     continue;
                 }
@@ -255,7 +255,7 @@ int link_to_target(struct config* conf)
                         size += snprintf(NULL, 0, "%s/*.o", conf->bin_dir);
                         break;
                     default:
-                        flog(LOG_WARNING, "Unrecognized '%' special charater in linker command");
+                        flog(LOG_WARNING, "Unrecognized '%%%c' special charater in linker command", special_ch);
                 }
                 i += 2;
             }
@@ -276,7 +276,6 @@ int link_to_target(struct config* conf)
             {
                 if (i >= link_command_size - 1)
                 {
-                    flog(LOG_WARNING, "Stray '%' at end of linker command");
                     i += 1;
                     continue;
                 }
@@ -294,8 +293,6 @@ int link_to_target(struct config* conf)
                     case 'o':
                         count += sprintf(&final_command[count], "%s/*.o", conf->bin_dir);
                         break;
-                    default:
-                        flog(LOG_WARNING, "Unrecognized '%' special charater in linker command");
                 }
                 i += 2;
             }
