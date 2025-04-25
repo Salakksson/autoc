@@ -1,6 +1,11 @@
-# Autoc - Simple Build Tool
+# Autoc - C/C++ *style* project build tool
 
-#### A build tool designed to make compilation simple
+<p align="center">
+	
+  ![image](https://github.com/user-attachments/assets/c79d1d77-5531-4407-8ae8-a408bec93440)
+
+</p>
+
 
 ## Features
 
@@ -11,7 +16,7 @@
 
 - `install.sh` can be used to compile and install autoc to a specific directory (by default `/usr/local/bin`)
 - There are currently no plans to support platforms other than linux by default, it may take some tweaking to work on other platforms such as windows or macos
-
+- 
 ## Configuration
 
 - `autoc.ini` is a standard ini file which should look like this:
@@ -22,6 +27,9 @@ src = ./src
 bin = ./bin
 target = autoc 
 ldflags = ; linker flags
+
+[link]
+command = gcc %l %o -o %t
 
 [.c]
 command = gcc -Wall -c %s -o %o
