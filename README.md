@@ -10,7 +10,7 @@
 ## Features
 
 - **Config file**: Uses an `autoc.ini` file in the project directory to set variables such as compiler flags
-- **Smart compilation**: Only compiles files which have changed since they were last compiled
+- **~~Smart~~ compilation**: Only compiles files which have changed since they were last compiled **note: this doesnt respect header dependancies**
 
 ## Compilation
 
