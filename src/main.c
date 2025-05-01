@@ -17,7 +17,7 @@ void add_flag(struct config* conf, char* arg)
 	for (int j = 1; j < strlen(arg); j++)
 		switch(arg[j])
 		{
-			case 'f':
+                        case 'f':
 				conf->force_compile = true;
 				break;
 			case 'r':
